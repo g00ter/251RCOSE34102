@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
-#define MAX_PROCESS_NUMBER 5
+#define MAX_PROCESS_NUMBER 3
 
 typedef struct process {
 	int pid; // 프로세스 번호
@@ -12,7 +12,6 @@ typedef struct process {
 }process;//io 구현은 본 스케줄러 구현에서 제외했으므로, 관련된 필드는 정의하지 않았다.
 
 process process_list[MAX_PROCESS_NUMBER];//프로세스를 담은 구조체 배열
-int process_count = 0;
 
 void process_info(process* list) {
     for (int i = 0; i < MAX_PROCESS_NUMBER; i++) {
@@ -30,17 +29,20 @@ bool time_dup_check(int arrival) {//arrival time이 겹치지 않게 함
 }
 
 void create_process() {
-    process p = { 0, };
-    int arrival_time;
-    do {
-        arrival_time = rand() % 6;  // 0 ~ 5 범위에서 랜덤으로 도착 시간 생성
-    } while (time_dup_check(arrival_time));  // 이미 있는 arrival 시간인지 확인
-    p.arrival = arrival_time;
-    p.pid = process_count + 1;
-    p.cpu_burst = (rand() % 6) + 5;       // 5 ~ 10
-    p.priority = (rand() % 4) + 1;        // 1 ~ 4
-   
-    process_list[process_count++] = p;
+    int process_count = 0;
+    for (int i = 0; i < MAX_PROCESS_NUMBER; i++) {
+        process p = { 0, };
+        int arrival_time;
+        do {
+            arrival_time = rand() % 6;  // 0 ~ 5 범위에서 랜덤으로 도착 시간 생성
+        } while (time_dup_check(arrival_time));  // 이미 있는 arrival 시간인지 확인
+        p.arrival = arrival_time;
+        p.pid = process_count + 1;
+        p.cpu_burst = (rand() % 6) + 5;       // 5 ~ 10
+        p.priority = (rand() % 4) + 1;        // 1 ~ 4
+
+        process_list[process_count++] = p;
+    }
 }
 int compare(process* a, process* b) {
     process* p1 = a;
@@ -217,14 +219,12 @@ int main() {
     srand((time(NULL)));
 
     // 프로세스 생성
-    for (int i = 0; i < MAX_PROCESS_NUMBER; i++) {
         create_process();
-    }
 
     process_info(process_list);
-    FCFS(process_list, MAX_PROCESS_NUMBER);
+    //FCFS(process_list, MAX_PROCESS_NUMBER);
     //NP_SJF(process_list,MAX_PROCESS_NUMBER);
-    //NP_Priority(process_list, MAX_PROCESS_NUMBER);
+    NP_Priority(process_list, MAX_PROCESS_NUMBER);
     return 0;
 }
 
