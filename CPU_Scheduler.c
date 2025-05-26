@@ -7,16 +7,16 @@
 #include <time.h>
 #define MAX_PROCESS_NUMBER 5
 typedef struct process {
-	int pid; // 프로세스 번호
-	int arrival; // 도착시간
-	int cpu_burst; // 실행시간
-	int priority; // 우선순위
+    int pid; // 프로세스 번호
+    int arrival; // 도착시간
+    int cpu_burst; // 실행시간
+    int priority; // 우선순위
 }process;//io 구현은 본 스케줄러 구현에서 제외했으므로, 관련된 필드는 정의하지 않았다.
 
 process process_list[MAX_PROCESS_NUMBER];//프로세스를 담은 구조체 배열
-float waiting_time_array[MAX_PROCESS_NUMBER]={ 0, };
+float waiting_time_array[MAX_PROCESS_NUMBER] = { 0, };
 float turnaround_time_array[MAX_PROCESS_NUMBER] = { 0, };//각 알고리즘의 성능 비교를 위해 평균 waitingtime과 turnaroundtime 저장
-void process_info(process* list,int size) {
+void process_info(process* list, int size) {
     for (int i = 0; i < size; i++) {
         printf("PID : %d  Arrival Time : %d  CPU Burst : %d  Priority : %d\n", process_list[i].pid, process_list[i].arrival, process_list[i].cpu_burst, process_list[i].priority);
     }
@@ -33,7 +33,7 @@ bool time_dup_check(int arrival) {//arrival time이 겹치지 않게 함
     return false;  // 겹치는 arrival 시간이 없음
 }
 
-void Gantt(int count,int *pid,int *start,int *end) {//솔직히 이거 비효율적인 거 맞음. start 는 한번만쓰는데
+void Gantt(int count, int* pid, int* end) {//솔직히 이거 비효율적인 거 맞음. start 는 한번만쓰는데
     printf("|");
     for (int i = 0; i < count; i++) {
         if (pid[i] == -1)//idle 프로세스일 경우
@@ -42,7 +42,7 @@ void Gantt(int count,int *pid,int *start,int *end) {//솔직히 이거 비효율
             printf("  P%d  |", pid[i]);//실행한 프로세스 출력
     }
 
-    printf("\n%d", start[0]);
+    printf("\n%d", 0);
     for (int i = 0; i < count; i++) {
         printf("%7d", end[i]);
     }
@@ -75,9 +75,8 @@ void FCFS(process* list, int size) {
 
     //간트차트 출력을 위한 정보를 저장할 배열 동적할당
     int* pid = (int*)malloc(sizeof(int) * size * 100);
-    int* start = (int*)malloc(sizeof(int) * size * 100);
     int* end = (int*)malloc(sizeof(int) * size * 100);
-    
+
     //프로세스 실행 기록
     int count = 0;
 
@@ -94,7 +93,7 @@ void FCFS(process* list, int size) {
 
     //모든 프로세스가 실행되도록 함
     while (terminated_count < size) {
-        
+
         int index = -1;//실행할 프로세스의 인덱스. -1일 경우는 idle
         int earliest_arrival = 100;//가장 arrival이 짧은 프로세스의 arrival 저장
 
@@ -120,7 +119,6 @@ void FCFS(process* list, int size) {
             }
             //idle 기간 정보를 간트차트 출력 위한 배열에 저장
             pid[count] = -1;
-            start[count] = current_time;
             end[count] = next_arrival;
             total_idle += next_arrival - current_time;
             current_time = next_arrival;
@@ -135,7 +133,6 @@ void FCFS(process* list, int size) {
 
             //실행정보를 간트차트 출력 위한 배열에 저장
             pid[count] = p.pid;
-            start[count] = start_time;
             end[count] = end_time;
             count++;
 
@@ -158,7 +155,7 @@ void FCFS(process* list, int size) {
     printf("Gantt Chart for FCFS\n");
     printf("=================================================================\n");
 
-    Gantt(count, pid, start, end);
+    Gantt(count, pid, end);
 
     printf("\n=================================================================\n");
     printf("Average Waiting Time: %.2f//", waiting_time_array[0]);
@@ -166,7 +163,6 @@ void FCFS(process* list, int size) {
     printf("CPU Utilization=%.2f%%\n", util(end[count - 1], total_idle));
 
     free(pid);
-    free(start);
     free(end);
     free(terminated);
 }
@@ -177,9 +173,8 @@ void NP_SJF(process* list, int size)
     int current_time = 0;
 
     //실행기록 저장용 배열 동적할당
-    int* pid = (int*)malloc(sizeof(int) *size*100); 
-    int* start = (int*)malloc(sizeof(int)*size*100 );
-    int* end = (int*)malloc(sizeof(int) * size*100);
+    int* pid = (int*)malloc(sizeof(int) * size * 100);
+    int* end = (int*)malloc(sizeof(int) * size * 100);
     int count = 0;
     int total_idle = 0;
 
@@ -216,7 +211,6 @@ void NP_SJF(process* list, int size)
             }
             //현재 도착한 프로세스가 없을 경우 cpu idle,이후 start[]와 end[] 업데이트(간트차트 표기용)
             pid[count] = -1;
-            start[count] = current_time;
             end[count] = next_arrival;
             count++;
             total_idle += next_arrival - current_time;
@@ -231,7 +225,6 @@ void NP_SJF(process* list, int size)
 
             //실행한 프로세스와 실행기간 기록
             pid[count] = p.pid;
-            start[count] = start_time;
             end[count] = end_time;
             count++;
 
@@ -254,7 +247,7 @@ void NP_SJF(process* list, int size)
     printf("Gantt Chart for Non Preemptive SJF\n");
     printf("=================================================================\n");
 
-    Gantt(count, pid, start, end);
+    Gantt(count, pid, end);
 
     printf("\n=================================================================\n");
     printf("Average Waiting Time: %.2f//", waiting_time_array[1]);
@@ -262,7 +255,6 @@ void NP_SJF(process* list, int size)
     printf("CPU Utilization=%.2f%%\n", util(end[count - 1], total_idle));
 
     free(pid);
-    free(start);
     free(end);
     free(terminated);
 }
@@ -272,7 +264,6 @@ void NP_Priority(process* list, int size) {
 
     // 간트차트 출력을 위한 실행 기록 저장
     int* pid = (int*)malloc(sizeof(int) * 100 * size);
-    int* start = (int*)malloc(sizeof(int) * 100 * size);
     int* end = (int*)malloc(sizeof(int) * 100 * size);
     int count = 0;
     int total_idle = 0;
@@ -312,7 +303,6 @@ void NP_Priority(process* list, int size) {
 
             //현재 도착한 프로세스가 없을 경우 cpu idle,이후 start[]와 end[] 업데이트(간트차트 표기용)
             pid[count] = -1;
-            start[count] = current_time;
             end[count] = next_arrival;
             count++;
             total_idle += next_arrival - current_time;
@@ -327,7 +317,6 @@ void NP_Priority(process* list, int size) {
 
             //실행한 프로세스와 실행기간 기록
             pid[count] = p.pid;
-            start[count] = start_time;
             end[count] = end_time;
             count++;
 
@@ -349,8 +338,8 @@ void NP_Priority(process* list, int size) {
     //간트차트 및 CPU utilization 출력
     printf("Gantt Chart for Non-Preemptive Priority\n");
     printf("=================================================================\n");
-    
-    Gantt(count, pid, start, end);
+
+    Gantt(count, pid, end);
 
     printf("\n=================================================================\n");
     printf("Average Waiting Time: %.2f//", waiting_time_array[2]);
@@ -358,7 +347,6 @@ void NP_Priority(process* list, int size) {
     printf("CPU Utilization=%.2f%%\n", util(end[count - 1], total_idle));
 
     free(pid);
-    free(start);
     free(end);
     free(terminated);
 }
@@ -369,7 +357,6 @@ void RR(process* list, int size) {
 
     //실행기록 저장용 배열 동적할당
     int* pid = (int*)malloc(sizeof(int) * size * 100);
-    int* start = (int*)malloc(sizeof(int) * size * 100);
     int* end = (int*)malloc(sizeof(int) * size * 100);
     int count = 0;
     int total_idle = 0;
@@ -392,7 +379,7 @@ void RR(process* list, int size) {
             int select = (last_index + i) % size;
             if (remaining_cpu_burst[select] > 0 && list[select].arrival <= current_time) {
                 index = select;
-          
+
                 //프로세스 선택
                 break;
             }
@@ -410,7 +397,6 @@ void RR(process* list, int size) {
 
             //현재 도착한 프로세스가 없을 경우 cpu idle,이후 start[]와 end[] 업데이트(간트차트 표기용)
             pid[count] = -1;
-            start[count] = current_time;
             end[count] = next_arrival;
             total_idle += (next_arrival - current_time);
             current_time = next_arrival;
@@ -419,13 +405,12 @@ void RR(process* list, int size) {
         }
 
         //실행시간 결정(Time Quantum보다 잔여 cpu burst time이 작을 경우 잔여 cpu burst time만큼 실행,아닐 경우 Time quantum만큼 실행)
-        else 
+        else
         {
             exec_time = (remaining_cpu_burst[index] > quantum) ? quantum : remaining_cpu_burst[index];
 
             //실행한 프로세스와 실행기간 기록
             pid[count] = list[index].pid;
-            start[count] = current_time;
             end[count] = current_time + exec_time;
             count++;
 
@@ -452,7 +437,7 @@ void RR(process* list, int size) {
     printf("Gantt Chart for Round Robin Scheduling (Time Quantum = %d)\n", quantum);
     printf("=================================================================\n");
 
-    Gantt(count, pid, start, end);
+    Gantt(count, pid, end);
 
     printf("\n=================================================================\n");
     printf("Average Waiting Time: %.2f//", waiting_time_array[3]);
@@ -460,7 +445,6 @@ void RR(process* list, int size) {
     printf("CPU Utilization = %.2f%%\n", util(end[count - 1], total_idle));
 
     free(pid);
-    free(start);
     free(end);
 }
 
@@ -471,12 +455,11 @@ void P_SJF(process* list, int size) {
     int remaining_cpu_burst[MAX_PROCESS_NUMBER] = { 0, };
     for (int i = 0; i < size; i++) {
         remaining_cpu_burst[i] = list[i].cpu_burst;
-    }    
+    }
     bool* terminated = (bool*)malloc(size * sizeof(bool));
 
     //실행기록 저장용 배열 동적할당
     int* pid = (int*)malloc(sizeof(int) * size * 100);
-    int* start = (int*)malloc(sizeof(int) * size * 100);
     int* end = (int*)malloc(sizeof(int) * size * 100);
     int count = 0;
     int total_idle = 0;
@@ -513,7 +496,6 @@ void P_SJF(process* list, int size) {
             //이전에 실행하던 프로세스가 있었을 경우 해당 프로세스의 실행정보 기록
             if (prev_index != -1) {
                 pid[count] = list[prev_index].pid;
-                start[count] = exec_start;
                 end[count] = current_time;
                 count++;
                 //이제부터 idle상태임을 나타냄
@@ -525,7 +507,7 @@ void P_SJF(process* list, int size) {
             //실행 가능한 프로세스 도착할 때까지 시간 증가
             while (1) {
                 current_time++;
-  
+
                 for (int i = 0; i < size; i++) {
                     //종료되지 않았고 현재 도착한 프로세스가 있을 경우 해당 프로세스 실행
                     if (!terminated[i] && list[i].arrival <= current_time) {
@@ -538,7 +520,6 @@ void P_SJF(process* list, int size) {
             }
             //현재 도착한 프로세스가 없을 경우 cpu idle,이후 start[]와 end[] 업데이트(간트차트 표기용)
             pid[count] = -1;
-            start[count] = exec_start;
             end[count] = current_time;
             count++;
             total_idle += current_time - exec_start;
@@ -551,7 +532,6 @@ void P_SJF(process* list, int size) {
         else {
             if (prev_index != -1 && prev_index != index) {
                 pid[count] = list[prev_index].pid;
-                start[count] = exec_start;
                 end[count] = current_time;
                 count++;
                 exec_start = current_time;
@@ -578,7 +558,6 @@ void P_SJF(process* list, int size) {
     //마지막 실행 프로세스 기록
     if (prev_index != -1) {
         pid[count] = list[prev_index].pid;
-        start[count] = exec_start;
         end[count] = current_time;
         count++;
     }
@@ -591,7 +570,7 @@ void P_SJF(process* list, int size) {
     printf("=================================================================\n");
 
     //간트차트 출력
-    Gantt(count, pid, start, end);
+    Gantt(count, pid, end);
 
     printf("\n=================================================================\n");
     printf("Average Waiting Time: %.2f//", waiting_time_array[4]);
@@ -600,7 +579,6 @@ void P_SJF(process* list, int size) {
 
     free(terminated);
     free(pid);
-    free(start);
     free(end);
 }
 
@@ -613,7 +591,6 @@ void P_Priority(process* list, int size) {
 
     //실행기록 저장용 배열 동적할당
     int* pid = (int*)malloc(sizeof(int) * size * 100);
-    int* start = (int*)malloc(sizeof(int) * size * 100);
     int* end = (int*)malloc(sizeof(int) * size * 100);
     int count = 0;
     int total_idle = 0;
@@ -650,7 +627,6 @@ void P_Priority(process* list, int size) {
             //이전에 실행하던 프로세스가 있었을 경우 해당 프로세스의 실행정보 기록
             if (prev_index != -1) {
                 pid[count] = list[prev_index].pid;
-                start[count] = exec_start;
                 end[count] = current_time;
                 count++;
                 prev_index = -1;
@@ -676,7 +652,6 @@ void P_Priority(process* list, int size) {
 
             //idle 구간 기록
             pid[count] = -1;
-            start[count] = exec_start;
             end[count] = current_time;
             count++;
             total_idle += current_time - exec_start;
@@ -688,7 +663,6 @@ void P_Priority(process* list, int size) {
             //프로세스 실행정보 기록 및 index 프로세스의 실행 시작시간 초기화        
             if (prev_index != -1 && prev_index != index) {
                 pid[count] = list[prev_index].pid;
-                start[count] = exec_start;
                 end[count] = current_time;
                 count++;
                 exec_start = current_time;
@@ -715,7 +689,6 @@ void P_Priority(process* list, int size) {
     //마지막 실행 프로세스 기록
     if (prev_index != -1) {
         pid[count] = list[prev_index].pid;
-        start[count] = exec_start;
         end[count] = current_time;
         count++;
     }
@@ -723,7 +696,7 @@ void P_Priority(process* list, int size) {
     waiting_time_array[5] /= size;
     turnaround_time_array[5] /= size;
 
-    Gantt(count, pid, start, end);
+    Gantt(count, pid, end);
 
     printf("\n=================================================================\n");
     printf("Average Waiting Time: %.2f//", waiting_time_array[5]);
@@ -733,7 +706,6 @@ void P_Priority(process* list, int size) {
     free(remaining_time);
     free(terminated);
     free(pid);
-    free(start);
     free(end);
 }
 void Evaluate(float* arr1, float* arr2, int size) {
@@ -811,16 +783,16 @@ int main() {
     //프로세스 개수 입력
     printf("input the number of the process less than 5: ");
     scanf("%d", &num);
-    
-    if (num > MAX_PROCESS_NUMBER || num<=0) {
+
+    if (num > MAX_PROCESS_NUMBER || num <= 0) {
         printf("Wrong range for the number of processes!");
         return 0;
     }//프로세스 개수를 잘못 지정했을 경우 종료
     //프로세스 생성
     create_process(num);
 
-    process_info(process_list,num);
-   
+    process_info(process_list, num);
+
     FCFS(process_list, num);
     NP_SJF(process_list, num);
     NP_Priority(process_list, num);
@@ -828,7 +800,7 @@ int main() {
     P_SJF(process_list, num);
     P_Priority(process_list, num);
 
-    Evaluate(waiting_time_array,turnaround_time_array,num);
+    Evaluate(waiting_time_array, turnaround_time_array, num);
 }
 
 
