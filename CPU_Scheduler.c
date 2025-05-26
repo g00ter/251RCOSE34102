@@ -33,13 +33,13 @@ bool time_dup_check(int arrival) {//arrival time이 겹치지 않게 함
     return false;  // 겹치는 arrival 시간이 없음
 }
 
-void Gantt(int count,int *pid,int *start,int *end) {
+void Gantt(int count,int *pid,int *start,int *end) {//솔직히 이거 비효율적인 거 맞음. start 는 한번만쓰는데
     printf("|");
     for (int i = 0; i < count; i++) {
-        if (pid[i] == -1)
+        if (pid[i] == -1)//idle 프로세스일 경우
             printf(" idle |");
         else
-            printf("  P%d  |", pid[i]);
+            printf("  P%d  |", pid[i]);//실행한 프로세스 출력
     }
 
     printf("\n%d", start[0]);
@@ -59,7 +59,7 @@ void create_process(int num) {
         p.arrival = arrival_time;
         p.pid = process_count + 1;
         p.cpu_burst = (rand() % 11) + 5;//5 ~ 15
-        p.priority = (rand() % 4) + 1;//1 ~ 4
+        p.priority = (rand() % 5) + 1;//1 ~ 5
 
         process_list[process_count++] = p;
     }
