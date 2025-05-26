@@ -381,16 +381,18 @@ void RR(process* list, int size) {
     for (int i = 0; i < size; i++) {
         remaining_cpu_burst[i] = list[i].cpu_burst;
     }
+    int index = -1;
 
     //모든 프로세스가 종료될 때 까지 반복
     while (terminated_count < size) {
-        int index = -1;
-
+        int last_index = (index + 1) % size;
+        index = -1;
         //종료되지 않은 프로세스 중 현재 도착한 프로세스 선택(PID 순서 탐색)
         for (int i = 0; i < size; i++) {
-            if (remaining_cpu_burst[i] > 0 && list[i].arrival <= current_time) {
-                index = i;
-
+            int select = (last_index + i) % size;
+            if (remaining_cpu_burst[select] > 0 && list[select].arrival <= current_time) {
+                index = select;
+          
                 //프로세스 선택
                 break;
             }
@@ -524,6 +526,7 @@ void P_SJF(process* list, int size) {
             //실행 가능한 프로세스 도착할 때까지 시간 증가
             while (1) {
                 current_time++;
+  
                 for (int i = 0; i < size; i++) {
                     //종료되지 않았고 현재 도착한 프로세스가 있을 경우 해당 프로세스 실행
                     if (!terminated[i] && list[i].arrival <= current_time) {
