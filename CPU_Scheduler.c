@@ -515,7 +515,6 @@ void P_SJF(process* list, int size) {
                 pid[count] = list[prev_index].pid;
                 start[count] = exec_start;
                 end[count] = current_time;
-                total_idle += current_time - exec_start;
                 count++;
                 //이제부터 idle상태임을 나타냄
                 prev_index = -1;
