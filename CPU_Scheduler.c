@@ -54,12 +54,12 @@ void create_process(int num) {
         process p = { 0, };
         int arrival_time;
         do {
-            arrival_time = rand() % 10;  // 0 ~ 9 범위에서 랜덤으로 도착 시간 생성
-        } while (time_dup_check(arrival_time));  // 이미 있는 arrival 시간인지 확인
+            arrival_time = rand() % 10;//0 ~ 9
+        } while (time_dup_check(arrival_time));//arrival 중복 확인
         p.arrival = arrival_time;
         p.pid = process_count + 1;
-        p.cpu_burst = (rand() % 11) + 5;       // 5 ~ 15
-        p.priority = (rand() % 5) + 1;        // 1 ~ 5
+        p.cpu_burst = (rand() % 11) + 5;//5 ~ 15
+        p.priority = (rand() % 4) + 1;//1 ~ 4
 
         process_list[process_count++] = p;
     }
@@ -70,7 +70,6 @@ float util(int total_time, int idle_time) {
     return ((float)(total_time - idle_time) / total_time) * 100;
 }
 
-// FCFS 스케줄링 함수
 void FCFS(process* list, int size) {
     int current_time = 0;
 
@@ -88,7 +87,7 @@ void FCFS(process* list, int size) {
     //종료된 프로세스의 인덱스는 true로 저장하는 boolean 타입 배열
     bool* terminated = (bool*)malloc(size);
     for (int i = 0; i < size; i++) {
-        terminated[i] = false;  
+        terminated[i] = false;
     }
     //종료된 프로세스 개수
     int terminated_count = 0;
@@ -111,44 +110,44 @@ void FCFS(process* list, int size) {
 
         //현재 시간까지 도착한 프로세스가 없다면 idle로 처리
         if (index == -1) {
-           int next_arrival = 100;
+            int next_arrival = 100;//idle 이후에 실행할 프로세스의 arrival
+
+            //idle 이후 실행할 프로세스의 arrival을 next_arrival에 저장
             for (int i = 0; i < size; i++) {
-                if (!terminated[i] && list[i].arrival > current_time) {//현재시간 이후로 도착하는 프로세스 중
-                    if (list[i].arrival < next_arrival)//가장 빠르게 도착하는 프로세스 실행
-                        next_arrival = list[i].arrival;
+                if (!terminated[i] && list[i].arrival < next_arrival) {
+                    next_arrival = list[i].arrival;
                 }
             }
             //idle 기간 정보를 간트차트 출력 위한 배열에 저장
-            pid[count] = -1;//간트차트 함수에서 pid==-1이면 idle이라고 출력함
+            pid[count] = -1;
             start[count] = current_time;
-            end[count] = next_arrival;//다음 프로세스의 실행시간까지 idle임
+            end[count] = next_arrival;
             total_idle += next_arrival - current_time;
-            current_time = next_arrival;//현재시간을 다음 프로세스의 실행시간으로 업데이트
+            current_time = next_arrival;
             count++;
-
-            //idle 기록 완료. 다음 프로세스 실행(위의 while문으로 복귀)
-            //continue;
         }
 
         // 선택된 프로세스 실행 후 시작,종료시간 기록
-        process p = list[index];
-        int start_time = current_time;
-        int end_time = start_time + p.cpu_burst;
+        else {
+            process p = list[index];
+            int start_time = current_time;
+            int end_time = start_time + p.cpu_burst;
 
-        //실행정보를 간트차트 출력 위한 배열에 저장
-        pid[count] = p.pid;
-        start[count] = start_time;
-        end[count] = end_time;
-        count++;
+            //실행정보를 간트차트 출력 위한 배열에 저장
+            pid[count] = p.pid;
+            start[count] = start_time;
+            end[count] = end_time;
+            count++;
 
-        //평균 turnaround time과 waiting time 저장 위해 turnaround time과 waiting time을 각 배열에 저장
-        turnaround_time_array[0] += (float)(end_time - p.arrival);
-        waiting_time_array[0] += (float)(start_time - p.arrival);
+            //평균 turnaround time과 waiting time 저장 위해 turnaround time과 waiting time을 각 배열에 저장
+            turnaround_time_array[0] += (float)(end_time - p.arrival);
+            waiting_time_array[0] += (float)(start_time - p.arrival);
 
-        //프로세스 종료 시 현재시간 업데이트 및 종료된 프로세스정보(terminated[],terminated_count) 업데이트
-        current_time = end_time;
-        terminated[index] = true;
-        terminated_count++;
+            //프로세스 종료 시 현재시간 업데이트 및 종료된 프로세스정보(terminated[],terminated_count) 업데이트
+            current_time = end_time;
+            terminated[index] = true;
+            terminated_count++;
+        }
     }
 
     //평균 waiting time,turnaround time 계산 후 각 배열에 저장
@@ -207,12 +206,11 @@ void NP_SJF(process* list, int size)
         }
 
         //현재 시간까지 도착한 프로세스가 없다면 idle로 처리
-        //idle이면 오지 않았다는 의미이므로 빨리 오는 거 잡아서 실행한다.
         if (index == -1) {
             int next_arrival = 100;
             for (int i = 0; i < size; i++) {
-                if (!terminated[i] && list[i].arrival > current_time) {//현재시간 이후로 도착하는 프로세스 중
-                    if (list[i].arrival < next_arrival)//가장 빠르게 도착하는 프로세스 실행
+                if (!terminated[i] && list[i].arrival > current_time) {
+                    if (list[i].arrival < next_arrival)
                         next_arrival = list[i].arrival;
                 }
             }
@@ -224,29 +222,28 @@ void NP_SJF(process* list, int size)
             total_idle += next_arrival - current_time;
             current_time = next_arrival;
 
-            //idle 기록 완료. 다음 프로세스 실행
-            //continue;
         }
 
-        // 선택된 프로세스 실행 후 시작,종료시간 기록
-        process p = list[index];
-        int start_time = current_time;
-        int end_time = start_time + p.cpu_burst;
+        else {// 선택된 프로세스 실행 후 시작,종료시간 기록
+            process p = list[index];
+            int start_time = current_time;
+            int end_time = start_time + p.cpu_burst;
 
-        //실행한 프로세스와 실행기간 기록
-        pid[count] = p.pid;
-        start[count] = start_time;
-        end[count] = end_time;
-        count++;
+            //실행한 프로세스와 실행기간 기록
+            pid[count] = p.pid;
+            start[count] = start_time;
+            end[count] = end_time;
+            count++;
 
-        //평균 turnaround time과 waiting time 저장 위해 turnaround time과 waiting time을 각 배열에 저장
-        turnaround_time_array[1] += (float)(end_time - p.arrival);
-        waiting_time_array[1] += (float)(start_time - p.arrival);
+            //평균 turnaround time과 waiting time 저장 위해 turnaround time과 waiting time을 각 배열에 저장
+            turnaround_time_array[1] += (float)(end_time - p.arrival);
+            waiting_time_array[1] += (float)(start_time - p.arrival);
 
-        //프로세스 종료 시 현재시간 업데이트 및 종료된 프로세스정보(terminated[],terminated_count) 업데이트
-        current_time = end_time;
-        terminated[index] = true;
-        terminated_count++;
+            //프로세스 종료 시 현재시간 업데이트 및 종료된 프로세스정보(terminated[],terminated_count) 업데이트
+            current_time = end_time;
+            terminated[index] = true;
+            terminated_count++;
+        }
     }
 
     //평균 waiting time,turnaround time 계산 후 각 배열에 저장
@@ -307,8 +304,8 @@ void NP_Priority(process* list, int size) {
         if (index == -1) {
             int next_arrival = 100;
             for (int i = 0; i < size; i++) {
-                if (!terminated[i] && list[i].arrival > current_time) {//현재시간 이후로 도착하는 프로세스 중
-                    if (list[i].arrival < next_arrival)//가장 빠르게 도착하는 프로세스 실행
+                if (!terminated[i] && list[i].arrival > current_time) {
+                    if (list[i].arrival < next_arrival)
                         next_arrival = list[i].arrival;
                 }
             }
@@ -321,29 +318,28 @@ void NP_Priority(process* list, int size) {
             total_idle += next_arrival - current_time;
             current_time = next_arrival;
 
-            //idle 기록 완료. 다음 프로세스 실행
-            //continue;
         }
 
-        // 선택된 프로세스 실행 후 시작,종료시간 기록
-        process p = list[index];
-        int start_time = current_time;
-        int end_time = start_time + p.cpu_burst;
+        else {// 선택된 프로세스 실행 후 시작,종료시간 기록
+            process p = list[index];
+            int start_time = current_time;
+            int end_time = start_time + p.cpu_burst;
 
-        //실행한 프로세스와 실행기간 기록
-        pid[count] = p.pid;
-        start[count] = start_time;
-        end[count] = end_time;
-        count++;
+            //실행한 프로세스와 실행기간 기록
+            pid[count] = p.pid;
+            start[count] = start_time;
+            end[count] = end_time;
+            count++;
 
-        //평균 turnaround time과 waiting time 저장 위해 turnaround time과 waiting time을 각 배열에 저장
-        turnaround_time_array[2] += (float)(end_time - p.arrival);
-        waiting_time_array[2] += (float)(start_time - p.arrival);
+            //평균 turnaround time과 waiting time 저장 위해 turnaround time과 waiting time을 각 배열에 저장
+            turnaround_time_array[2] += (float)(end_time - p.arrival);
+            waiting_time_array[2] += (float)(start_time - p.arrival);
 
-        //프로세스 종료 시 현재시간 업데이트 및 종료된 프로세스정보(terminated[],terminated_count) 업데이트
-        current_time = end_time;
-        terminated[index] = true;
-        terminated_count++;
+            //프로세스 종료 시 현재시간 업데이트 및 종료된 프로세스정보(terminated[],terminated_count) 업데이트
+            current_time = end_time;
+            terminated[index] = true;
+            terminated_count++;
+        }
     }
 
     //평균 waiting time,turnaround time 계산 후 각 배열에 저장
@@ -381,7 +377,6 @@ void RR(process* list, int size) {
     //프로세스 실행 시간
     int exec_time = 0;
 
-    //각 프로세스의 잔여cpuburst를 담은 배열. cpuburst로 초기화. terminated는 종료사실만 기록하는데 여기서는 남은 시간이 더 중요하므로 통합
     int remaining_cpu_burst[MAX_PROCESS_NUMBER] = { 0, };
     for (int i = 0; i < size; i++) {
         remaining_cpu_burst[i] = list[i].cpu_burst;
@@ -405,8 +400,8 @@ void RR(process* list, int size) {
         if (index == -1) {
             int next_arrival = 100;
             for (int i = 0; i < size; i++) {
-                if (remaining_cpu_burst[i] > 0 && list[i].arrival > current_time) {//현재시간 이후로 도착하는 프로세스 중
-                    if (list[i].arrival < next_arrival)//가장 빠르게 도착하는 프로세스 실행(선점없으니 빨리오는거 실행해야지)
+                if (remaining_cpu_burst[i] > 0 && list[i].arrival > current_time) {
+                    if (list[i].arrival < next_arrival)
                         next_arrival = list[i].arrival;
                 }
             }
@@ -419,30 +414,31 @@ void RR(process* list, int size) {
             current_time = next_arrival;
             count++;
 
-            //idle 기록 완료. 다음 프로세스 실행
-            continue;
         }
 
         //실행시간 결정(Time Quantum보다 잔여 cpu burst time이 작을 경우 잔여 cpu burst time만큼 실행,아닐 경우 Time quantum만큼 실행)
-        exec_time = (remaining_cpu_burst[index] > quantum) ? quantum : remaining_cpu_burst[index];
+        else 
+        {
+            exec_time = (remaining_cpu_burst[index] > quantum) ? quantum : remaining_cpu_burst[index];
 
-        //실행한 프로세스와 실행기간 기록
-        pid[count] = list[index].pid;
-        start[count] = current_time;
-        end[count] = current_time + exec_time;
-        count++;
+            //실행한 프로세스와 실행기간 기록
+            pid[count] = list[index].pid;
+            start[count] = current_time;
+            end[count] = current_time + exec_time;
+            count++;
 
-        //프로세스 실행 후 현재 시간 업데이트 및 잔여 cpu burst정보 최신화
-        current_time += exec_time;
-        remaining_cpu_burst[index] -= exec_time;
+            //프로세스 실행 후 현재 시간 업데이트 및 잔여 cpu burst정보 최신화
+            current_time += exec_time;
+            remaining_cpu_burst[index] -= exec_time;
 
-        //프로세스 종료 시 turnaround time과 waiting time 저장. 이후 종료된 프로세스정보(terminated[],terminated_count) 업데이트
-        if (remaining_cpu_burst[index] == 0) {
-            int turnaround = current_time - list[index].arrival;
-            int waiting = turnaround - list[index].cpu_burst;
-            turnaround_time_array[3] += turnaround;
-            waiting_time_array[3] += waiting;
-            terminated_count++;
+            //프로세스 종료 시 turnaround time과 waiting time 저장. 이후 종료된 프로세스정보(terminated[],terminated_count) 업데이트
+            if (remaining_cpu_burst[index] == 0) {
+                int turnaround = current_time - list[index].arrival;
+                int waiting = turnaround - list[index].cpu_burst;
+                turnaround_time_array[3] += turnaround;
+                waiting_time_array[3] += waiting;
+                terminated_count++;
+            }
         }
     }
 
@@ -483,14 +479,13 @@ void P_SJF(process* list, int size) {
     int count = 0;
     int total_idle = 0;
 
-    //이제부터 선점 있으니 reamining cpu 계산해야함
     for (int i = 0; i < size; i++) {
         remaining_cpu_burst[i] = list[i].cpu_burst;
         terminated[i] = false;
     }
 
     //이전 실행되던 프로세스정보와(간트차트 기록용) 현재 프로세스의 실행 시작시간 저장
-    int prev_index = -1;//Preemption 판단 시 사용
+    int prev_index = -1;
     int exec_start = 0;
 
 
@@ -501,7 +496,7 @@ void P_SJF(process* list, int size) {
 
 
         /*현재 시간까지 도착한 프로세스 중 아직 실행되지 않은 프로세스 중에서 cpu burst가 가장 짧은 프로세스 선택
-        혹은 잔여 cpu_busrt가 최소인 다른 프로세스를 만나면 arrival이 더 빠른 것으로 선택해 cpu_burst와 index에 값 대입(동일한 cpu burst에 대해서는 FCFS)*/
+        혹은 cpu_busrt가 최소인 다른 프로세스를 만나면 arrival이 더 빠른 것으로 선택해 cpu_burst와 index에 값 대입(동일한 cpu burst에 대해서는 FCFS)*/
         for (int i = 0; i < size; i++) {
             if (!terminated[i] && list[i].arrival <= current_time) {
                 if (remaining_cpu_burst[i] < shortest_burst || (remaining_cpu_burst[i] == shortest_burst && list[i].arrival < list[index].arrival)) {
@@ -510,10 +505,10 @@ void P_SJF(process* list, int size) {
                 }
             }
         }
-        
+
         //현재 시간까지 도착한 프로세스가 없다면 idle로 처리
         if (index == -1) {
-            //이전에 실행하던 프로세스가 있었을 경우 해당 프로세스의 실행정보 기록(preemption 발생 시 간트차트 기록으로 구현해서 여기서한다.)
+            //이전에 실행하던 프로세스가 있었을 경우 해당 프로세스의 실행정보 기록
             if (prev_index != -1) {
                 pid[count] = list[prev_index].pid;
                 start[count] = exec_start;
@@ -526,10 +521,9 @@ void P_SJF(process* list, int size) {
             //idle의 시작시점 기록
             exec_start = current_time;
 
-            //실행 가능한 프로세스 도착할 때까지 시간 증가(대기)
+            //실행 가능한 프로세스 도착할 때까지 시간 증가
             while (1) {
                 current_time++;
-                index = -1;//이전에 idle 아니었다가 idle 되었을 경우
                 for (int i = 0; i < size; i++) {
                     //종료되지 않았고 현재 도착한 프로세스가 있을 경우 해당 프로세스 실행
                     if (!terminated[i] && list[i].arrival <= current_time) {
@@ -537,7 +531,7 @@ void P_SJF(process* list, int size) {
                         break;
                     }
                 }
-                //프로세스 실행 시 반복문 탈출(위의 if문에서 break 시)
+                //프로세스 실행 시 반복문 탈출
                 if (index != -1) break;
             }
             //현재 도착한 프로세스가 없을 경우 cpu idle,이후 start[]와 end[] 업데이트(간트차트 표기용)
@@ -551,33 +545,34 @@ void P_SJF(process* list, int size) {
         }
 
         //preemption 발생(idle이 아니면서 현재 실행할 프로세스가 이전에 실행하는 프로세스와 다를 경우)
-        //이전까지의 프로세스 실행정보 기록 및 index 프로세스의 실행 시작시간 초기화
-        if (prev_index != -1 && prev_index != index) {
-            pid[count] = list[prev_index].pid;
-            start[count] = exec_start;
-            end[count] = current_time;
-            count++;
-            exec_start = current_time;
-        }
+        //프로세스 실행정보 기록 및 index 프로세스의 실행 시작시간 초기화
+        else {
+            if (prev_index != -1 && prev_index != index) {
+                pid[count] = list[prev_index].pid;
+                start[count] = exec_start;
+                end[count] = current_time;
+                count++;
+                exec_start = current_time;
+            }
 
-        //현재 실행중인 프로세스 인덱스를 prev_index에 저장 후 index 프로세스의 잔여 cpu burst time 1 감소 및 현재시간 1 증가
-        prev_index = index;
-        remaining_cpu_burst[index]--;
-        current_time++;
+            //현재 실행중인 프로세스 인덱스를 prev_index에 저장 후 index 프로세스의 잔여 cpu burst time 1 감소 및 현재시간 1 증가
+            prev_index = index;
+            remaining_cpu_burst[index]--;
+            current_time++;
 
-        //현재 프로세스가 종료될 경우 turnaround time과 waiting time 저장
-        if (remaining_cpu_burst[index] == 0) {
-            int turnaround_time = current_time - list[index].arrival;
-            int waiting_time = turnaround_time - list[index].cpu_burst;
-            turnaround_time_array[4] += turnaround_time;
-            waiting_time_array[4] += waiting_time;
+            //현재 프로세스가 종료될 경우 turnaround time과 waiting time 저장
+            if (remaining_cpu_burst[index] == 0) {
+                int turnaround_time = current_time - list[index].arrival;
+                int waiting_time = turnaround_time - list[index].cpu_burst;
+                turnaround_time_array[4] += turnaround_time;
+                waiting_time_array[4] += waiting_time;
 
-            //프로세스 종료 시 종료된 프로세스정보(terminated[],terminated_count) 업데이트
-            terminated[index] = true;
-            terminated_count++;
+                //프로세스 종료 시 종료된 프로세스정보(terminated[],terminated_count) 업데이트
+                terminated[index] = true;
+                terminated_count++;
+            }
         }
     }
-
     //마지막 실행 프로세스 기록
     if (prev_index != -1) {
         pid[count] = list[prev_index].pid;
@@ -585,7 +580,6 @@ void P_SJF(process* list, int size) {
         end[count] = current_time;
         count++;
     }
-
 
     waiting_time_array[4] /= size;
     turnaround_time_array[4] /= size;
@@ -687,35 +681,35 @@ void P_Priority(process* list, int size) {
 
             exec_start = current_time;
         }
-
+        else {
             //preemption 발생(idle이 아니면서 현재 실행할 프로세스가 이전에 실행하는 프로세스와 다를 경우)
             //프로세스 실행정보 기록 및 index 프로세스의 실행 시작시간 초기화        
             if (prev_index != -1 && prev_index != index) {
-            pid[count] = list[prev_index].pid;
-            start[count] = exec_start;
-            end[count] = current_time;
-            count++;
-            exec_start = current_time;
-        }
+                pid[count] = list[prev_index].pid;
+                start[count] = exec_start;
+                end[count] = current_time;
+                count++;
+                exec_start = current_time;
+            }
 
-        //현재 실행중인 프로세스 인덱스를 prev_index에 저장 후 index 프로세스의 잔여 cpu burst time 1 감소 및 현재시간 1 증가
-        prev_index = index;
-        remaining_time[index]--;
-        current_time++;
+            //현재 실행중인 프로세스 인덱스를 prev_index에 저장 후 index 프로세스의 잔여 cpu burst time 1 감소 및 현재시간 1 증가
+            prev_index = index;
+            remaining_time[index]--;
+            current_time++;
 
-        //현재 프로세스가 종료될 경우 turnaround time과 waiting time 저장
-        if (remaining_time[index] == 0) {
-            int turnaround_time = current_time - list[index].arrival;
-            int waiting_time = turnaround_time - list[index].cpu_burst;
-            turnaround_time_array[5] += turnaround_time;
-            waiting_time_array[5] += waiting_time;
+            //현재 프로세스가 종료될 경우 turnaround time과 waiting time 저장
+            if (remaining_time[index] == 0) {
+                int turnaround_time = current_time - list[index].arrival;
+                int waiting_time = turnaround_time - list[index].cpu_burst;
+                turnaround_time_array[5] += turnaround_time;
+                waiting_time_array[5] += waiting_time;
 
-            //프로세스 종료 시 종료된 프로세스정보(terminated[],terminated_count) 업데이트
-            terminated[index] = true;
-            terminated_count++;
+                //프로세스 종료 시 종료된 프로세스정보(terminated[],terminated_count) 업데이트
+                terminated[index] = true;
+                terminated_count++;
+            }
         }
     }
-
     //마지막 실행 프로세스 기록
     if (prev_index != -1) {
         pid[count] = list[prev_index].pid;
@@ -814,7 +808,7 @@ int main() {
 
     //프로세스 개수 입력
     printf("input the number of the process less than 5: ");
-    scanf_s("%d", &num);
+    scanf("%d", &num);
     
     if (num > MAX_PROCESS_NUMBER || num<=0) {
         printf("Wrong range for the number of processes!");
