@@ -33,7 +33,7 @@ bool time_dup_check(int arrival) {//arrival time이 겹치지 않게 함
     return false;  // 겹치는 arrival 시간이 없음
 }
 
-void Gantt(int count, int* pid, int* end) {//솔직히 이거 비효율적인 거 맞음. start 는 한번만쓰는데
+void Gantt(int count, int* pid, int* end) {
     printf("|");
     for (int i = 0; i < count; i++) {
         if (pid[i] == -1)//idle 프로세스일 경우
