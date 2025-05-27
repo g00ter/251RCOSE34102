@@ -36,7 +36,7 @@ bool time_dup_check(int arrival) {//arrival time이 겹치지 않게 함
 void Gantt(int count, int* pid, int* end) {
     printf("|");
     for (int i = 0; i < count; i++) {
-        if (pid[i] == -1)//idle 프로세스일 경우
+        if (pid[i] == 0)//idle 프로세스일 경우
             printf(" idle |");
         else
             printf("  P%d  |", pid[i]);//실행한 프로세스 출력
@@ -119,7 +119,7 @@ void FCFS(process* list, int size) {
                 }
             }
             //idle 기간 정보를 간트차트 출력 위한 배열에 저장
-            pid[count] = -1;
+            pid[count] = 0;
             end[count] = next_arrival;
             total_idle += next_arrival - current_time;
             current_time = next_arrival;
@@ -211,7 +211,7 @@ void NP_SJF(process* list, int size)
                 }
             }
             //현재 도착한 프로세스가 없을 경우 cpu idle,이후 end[] 업데이트(간트차트 표기용)
-            pid[count] = -1;
+            pid[count] = 0;
             end[count] = next_arrival;
             count++;
             total_idle += next_arrival - current_time;
@@ -303,7 +303,7 @@ void NP_Priority(process* list, int size) {
             }
 
             //현재 도착한 프로세스가 없을 경우 cpu idle,이후 start[]와 end[] 업데이트(간트차트 표기용)
-            pid[count] = -1;
+            pid[count] = 0;
             end[count] = next_arrival;
             count++;
             total_idle += next_arrival - current_time;
@@ -397,7 +397,7 @@ void RR(process* list, int size) {
             }
 
             //현재 도착한 프로세스가 없을 경우 cpu idle,이후 start[]와 end[] 업데이트(간트차트 표기용)
-            pid[count] = -1;
+            pid[count] = 0;
             end[count] = next_arrival;
             total_idle += (next_arrival - current_time);
             current_time = next_arrival;
@@ -520,7 +520,7 @@ void P_SJF(process* list, int size) {
                 if (index != -1) break;
             }
             //현재 도착한 프로세스가 없을 경우 cpu idle,이후 start[]와 end[] 업데이트(간트차트 표기용)
-            pid[count] = -1;
+            pid[count] = 0;
             end[count] = current_time;
             count++;
             total_idle += current_time - exec_start;
@@ -652,7 +652,7 @@ void P_Priority(process* list, int size) {
             }
 
             //idle 구간 기록
-            pid[count] = -1;
+            pid[count] = 0;
             end[count] = current_time;
             count++;
             total_idle += current_time - exec_start;
