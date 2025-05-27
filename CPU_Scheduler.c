@@ -88,7 +88,7 @@ void FCFS(process* list, int size) {
     for (int i = 0; i < size; i++) {
         terminated[i] = false;
     }
-    //종료된 프로세스 개수
+    //종료된 프로세스 개수. 아래 while 원툴
     int terminated_count = 0;
 
     //모든 프로세스가 실행되도록 함
@@ -113,8 +113,9 @@ void FCFS(process* list, int size) {
 
             //idle 이후 실행할 프로세스의 arrival을 next_arrival에 저장
             for (int i = 0; i < size; i++) {
-                if (!terminated[i] && list[i].arrival < next_arrival) {
-                    next_arrival = list[i].arrival;
+                if (!terminated[i] && list[i].arrival > current_time) {
+                    if (list[i].arrival < next_arrival)
+                        next_arrival = list[i].arrival;
                 }
             }
             //idle 기간 정보를 간트차트 출력 위한 배열에 저장
@@ -209,7 +210,7 @@ void NP_SJF(process* list, int size)
                         next_arrival = list[i].arrival;
                 }
             }
-            //현재 도착한 프로세스가 없을 경우 cpu idle,이후 start[]와 end[] 업데이트(간트차트 표기용)
+            //현재 도착한 프로세스가 없을 경우 cpu idle,이후 end[] 업데이트(간트차트 표기용)
             pid[count] = -1;
             end[count] = next_arrival;
             count++;
