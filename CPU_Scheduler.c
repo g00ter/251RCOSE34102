@@ -218,7 +218,7 @@ void NP_SJF(process* list, int size)
 
         }
 
-        else {// 선택된 프로세스 실행 후 시작,종료시간 기록
+        else {//선택된 프로세스 실행 후 시작,종료시간 기록
             process p = list[index];
             int start_time = current_time;
             int end_time = start_time + p.cpu_burst;
@@ -768,7 +768,7 @@ void Evaluate(float* arr1, float* arr2, int size) {
 }
 
 int main() {
-    int num;//프로세스 개수,알고리즘 종류
+    int num;//프로세스 개수
     srand((time(NULL)));
 
     //프로세스 개수 입력
