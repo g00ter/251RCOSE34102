@@ -679,12 +679,10 @@ void P_Priority(process* list, int size) {
             }
         }
     }
-    //마지막 실행 프로세스 기록
-    if (prev_index != -1) {
+        //마지막 실행 프로세스 기록
         pid[count] = list[prev_index].pid;
         end[count] = current_time;
         count++;
-    }
 
     waiting_time_array[5] /= size;
     turnaround_time_array[5] /= size;
