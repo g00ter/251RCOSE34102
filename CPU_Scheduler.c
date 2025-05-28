@@ -498,26 +498,24 @@ void P_SJF(process* list, int size) {
                 pid[count] = list[prev_index].pid;
                 end[count] = current_time;
                 count++;
-                //이제부터 idle상태임을 나타냄
+                //이제부터 idle상태임을 나타냄+이후에 프로세스 실행 시 이전 프로세스와 다를 경우 idle이었다.
                 prev_index = -1;
             }
             //idle의 시작시점 기록
             exec_start = current_time;
 
             //실행 가능한 프로세스 도착할 때까지 시간 증가
-            while (1) {
-                current_time++;
-
-                for (int i = 0; i < size; i++) {
-                    //종료되지 않았고 현재 도착한 프로세스가 있을 경우 해당 프로세스 실행
-                    if (!terminated[i] && list[i].arrival <= current_time) {
+            int next_arrival = 100;
+            for (int i = 0; i < size; i++) {
+                if (!terminated[i] && list[i].arrival > current_time) {
+                    if (list[i].arrival < next_arrival) {
+                        next_arrival = list[i].arrival;
                         index = i;
-                        break;
                     }
                 }
-                //프로세스 실행 시 반복문 탈출
-                if (index != -1) break;
             }
+            current_time = list[index].arrival;
+            
             //현재 도착한 프로세스가 없을 경우 cpu idle,이후 start[]와 end[] 업데이트(간트차트 표기용)
             pid[count] = 0;
             end[count] = current_time;
@@ -555,12 +553,10 @@ void P_SJF(process* list, int size) {
             }
         }
     }
-    //마지막 실행 프로세스 기록
-    if (prev_index != -1) {
+        //마지막 실행 프로세스 기록
         pid[count] = list[prev_index].pid;
         end[count] = current_time;
         count++;
-    }
 
     waiting_time_array[4] /= size;
     turnaround_time_array[4] /= size;
@@ -636,19 +632,16 @@ void P_Priority(process* list, int size) {
             exec_start = current_time;
 
             //실행 가능한 프로세스 도착할 때까지 시간 증가
-            while (1) {
-                current_time++;
-                index = -1;
-                for (int i = 0; i < size; i++) {
-                    //종료되지 않았고 현재 도착한 프로세스가 있을 경우 해당 프로세스 실행
-                    if (!terminated[i] && list[i].arrival <= current_time) {
+            int next_arrival = 100;
+            for (int i = 0; i < size; i++) {
+                if (!terminated[i] && list[i].arrival > current_time) {
+                    if (list[i].arrival < next_arrival) {
+                        next_arrival = list[i].arrival;
                         index = i;
-                        break;
                     }
                 }
-                //for 문에서 발견한 프로세스 실행 시 반복문 탈출
-                if (index != -1) break;
             }
+            current_time = list[index].arrival;
 
             //idle 구간 기록
             pid[count] = 0;
